@@ -10,6 +10,10 @@ class VEGAS:
 
         self.titleScreenInit()
 
+        self.gameMode = tk.StringVar() 
+        self.playerCount = tk.IntVar()
+
+
 
         self.Gamble.mainloop()
 
@@ -50,15 +54,17 @@ class VEGAS:
 
         self.playerTotal = tk.IntVar()
 
-        self.twoPlayers = tk.Button(self.numberField, text = "2", command = self.enterPlayerCount)
-        self.threePlayers = tk.Button(self.numberField, text = "3", command = self.enterPlayerCount)
-        self.fourPlayers = tk.Button(self.numberField, text = "4", command = self.enterPlayerCount)
-        self.fivePlayers = tk.Button(self.numberField, text = "5", command = self.enterPlayerCount)
-        self.sixPlayers = tk.Button(self.numberField, text = "6", command = self.enterPlayerCount)
-        self.sevenPlayers = tk.Button(self.numberField, text = "7", command = self.enterPlayerCount)
-        self.eightPlayers = tk.Button(self.numberField, text = "8",command = self.enterPlayerCount)
-        self.ninePlayers = tk.Button(self.numberField, text = "9", command = self.enterPlayerCount)
-        self.tenPlayers = tk.Button(self.numberField, text = "10", command = self.enterPlayerCount)
+        #I can't figure out how to get these buttons to pass a value so I have to caveman brute force the values
+
+        self.twoPlayers = tk.Button(self.numberField, text = "2", command = self.enterPlayerCountTwo)
+        self.threePlayers = tk.Button(self.numberField, text = "3", command = self.enterPlayerCountThree)
+        self.fourPlayers = tk.Button(self.numberField, text = "4", command = self.enterPlayerCountFour)
+        self.fivePlayers = tk.Button(self.numberField, text = "5", command = self.enterPlayerCountFive)
+        self.sixPlayers = tk.Button(self.numberField, text = "6", command = self.enterPlayerCountSix)
+        self.sevenPlayers = tk.Button(self.numberField, text = "7", command = self.enterPlayerCountSeven)
+        self.eightPlayers = tk.Button(self.numberField, text = "8", command = self.enterPlayerCountEight)
+        self.ninePlayers = tk.Button(self.numberField, text = "9", command = self.enterPlayerCountNine)
+        self.tenPlayers = tk.Button(self.numberField, text = "10", command = self.enterPlayerCountTen)
 
 
         self.twoPlayers.grid(row = 0, column = 0, sticky = "news")
@@ -82,10 +88,13 @@ class VEGAS:
         for widget in self.Gamble.winfo_children():
             widget.destroy()
 
+
+#Collection of gametype setting functions (SHOULD BE CONSOLIDATED EVENTUALLY)
     def gameOneSelect(self):
         print("You have selected Texas Hold Em") 
         self.purgeEverything()
         self.playerCountScreenInit()   
+        self.gameMode = "holdem"
         
 
 
@@ -93,20 +102,95 @@ class VEGAS:
         print("You have selected 5 card Poker")
         self.purgeEverything()
         self.playerCountScreenInit()
+        self.gameMode = "5card"
 
 
     def gameThreeSelect(self):
         print("You have selected Blackjack")
         self.purgeEverything()
         self.playerCountScreenInit()
+        self.gameMode = "blkjk"
 
 
-    def enterPlayerCount(self):
 
+#Collection of player count setting Functions (SHOULD BE CONSOLIDATED EVENTUALLY)
+    def enterPlayerCountTwo(self):
+
+        self.playerCount = 2
         print("player count set!")
+        print(self.playerCount)
+        self.loadGameScreen()
+
+    def enterPlayerCountThree(self):
+
+        self.playerCount = 3
+        print("player count set!")
+        print(self.playerCount)
+        self.loadGameScreen()
+
+    def enterPlayerCountFour(self):
+
+        self.playerCount = 4
+        print("player count set!")
+        print(self.playerCount)
+        self.loadGameScreen()
+
+    def enterPlayerCountFive(self):
+
+        self.playerCount = 5
+        print("player count set!")
+        print(self.playerCount)
+        self.loadGameScreen()    
+
+    def enterPlayerCountSix(self):
+
+        self.playerCount = 6
+        print("player count set!")
+        print(self.playerCount)
+        self.loadGameScreen()    
+
+    def enterPlayerCountSeven(self):
+
+        self.playerCount = 7
+        print("player count set!")
+        print(self.playerCount)
+        self.loadGameScreen()
 
 
+    def enterPlayerCountEight(self):
 
+        self.playerCount = 8
+        print("player count set!")
+        print(self.playerCount)
+        self.loadGameScreen()
 
+    def enterPlayerCountNine(self):
+
+        self.playerCount = 9
+        print("player count set!")
+        print(self.playerCount)
+        self.loadGameScreen()    
+
+    def enterPlayerCountTen(self):
+
+        self.playerCount = 10
+        print("player count set!")
+        print(self.playerCount)
+        self.loadGameScreen()
+
+    def loadGameScreen(self):
+
+        self.purgeEverything()
+        if self.gameMode == "holdem":
+            print("We are starting Texas Holdem")
+            #launch instance of holdem class window
+
+        elif self.gameMode == "5card":
+            print("We are starting a game of 5 Card Poker")
+            #launch instance of poker class
+
+        elif self.gameMode == "blkjk":
+            print("We are starting a game of Blackjack")
+            #launch instance of blackjack class
 
 VEGAS()
