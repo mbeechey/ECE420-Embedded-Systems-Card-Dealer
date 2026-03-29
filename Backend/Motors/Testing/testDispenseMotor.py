@@ -1,60 +1,62 @@
 import RPi.GPIO as GPIO
 import time
 
-# -----------------------
-# PINS (MAIN CHUTE ONLY)
-# -----------------------
-PWM3 = 19
-DIR3 = 25
-
-PWM4 = 18
-DIR4 = 17
+IN1 = 12   # BCM 12
+IN2 = 23   # BCM 23
+PWM_FREQ = 1000
 
 GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
 
-GPIO.setup(PWM3, GPIO.OUT)
-GPIO.setup(DIR3, GPIO.OUT)
-GPIO.setup(PWM4, GPIO.OUT)
-GPIO.setup(DIR4, GPIO.OUT)
+GPIO.setup(IN1, GPIO.OUT)
+GPIO.setup(IN2, GPIO.OUT)
 
-# PWM setup
-pwm3 = GPIO.PWM(PWM3, 1000)
-pwm4 = GPIO.PWM(PWM4, 1000)
+pwm1 = GPIO.PWM(IN1, PWM_FREQ)
+pwm2 = GPIO.PWM(IN2, PWM_FREQ)
 
-pwm3.start(0)
-pwm4.start(0)
+pwm1.start(0)
+pwm2.start(0)
 
-# -----------------------
-# TEST FUNCTION
-# -----------------------
+print("Automatic card dealing ready")
 
-def test_dispense(power=100, duration=1.0, direction=1):
-    print(f"Running dispense motor | Power: {power}% | Time: {duration}s")
+def motor_forward(power):
+    pwm2.ChangeDutyCycle(0)
+    pwm1.ChangeDutyCycle(power)
 
-    GPIO.output(DIR3, direction)
-    GPIO.output(DIR4, direction)
+def motor_reverse(power):
+    pwm1.ChangeDutyCycle(0)
+    pwm2.ChangeDutyCycle(power)
 
-    pwm3.ChangeDutyCycle(power)
-    pwm4.ChangeDutyCycle(power)
+def motor_stop():
+    pwm1.ChangeDutyCycle(0)
+    pwm2.ChangeDutyCycle(0)
 
-    time.sleep(duration)
+def dispense_one_card():
+    print("Forward: dispensing")
+    motor_forward(100)        # tune 70-100
+    time.sleep(0.06)         # tune 0.05-0.18
 
-    pwm3.ChangeDutyCycle(0)
-    pwm4.ChangeDutyCycle(0)
+    print("Stop")
+    motor_stop()
+    time.sleep(0.01)
 
-    print("Stopped\n")
+    print("Reverse: anti-double-feed")
+    motor_reverse(70)        # tune 50-80
+    time.sleep(0.05)         # tune 0.01-0.08
 
-
-# -----------------------
-# MAIN TEST LOOP
-# -----------------------
+    print("Stop")
+    motor_stop()
+    time.sleep(0.60)         # gap before next card
 
 try:
     while True:
-        test_dispense(power=100, duration=1.5)
-        time.sleep(2)
+        dispense_one_card()
+
+except KeyboardInterrupt:
+    print("Stopping")
 
 finally:
-    pwm3.stop()
-    pwm4.stop()
+    motor_stop()
+    pwm1.stop()
+    pwm2.stop()
     GPIO.cleanup()

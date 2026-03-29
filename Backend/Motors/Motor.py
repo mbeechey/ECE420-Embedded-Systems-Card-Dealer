@@ -6,18 +6,16 @@ import time
 # -----------------------
 
 # Chute motors (shuffling)
-PWM1 = 12
-DIR1 = 23
+PWM1 = 19
+DIR1 = 25
 
-PWM2 = 13
-DIR2 = 24
+PWM2 = 18
+DIR2 = 17
 
 # Main chute motors (dispensing)
-PWM3 = 19
-DIR3 = 25
+PWM3 = 12
+DIR3 = 23
 
-PWM4 = 18
-DIR4 = 17
 
 # -----------------------
 # STEPPER PINS
