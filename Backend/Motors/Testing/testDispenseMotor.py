@@ -34,7 +34,7 @@ def motor_stop():
 def dispense_one_card():
     print("Forward: dispensing")
     motor_forward(100)        # tune 70-100
-    time.sleep(0.06)         # tune 0.05-0.18
+    time.sleep(0.045)         # tune 0.05-0.18
 
     print("Stop")
     motor_stop()
@@ -42,7 +42,7 @@ def dispense_one_card():
 
     print("Reverse: anti-double-feed")
     motor_reverse(70)        # tune 50-80
-    time.sleep(0.05)         # tune 0.01-0.08
+    time.sleep(0.1)         # tune 0.01-0.08
 
     print("Stop")
     motor_stop()
