@@ -260,7 +260,8 @@ void showPokerScreen() {
 
 // ─── Texas Hold'em Screen ───────────────────────────────────
 void showHoldScreen() {
-  lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x1a1a2e), 0);
+    lv_obj_clean(lv_scr_act());
+    lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x1a1a2e), 0);
 
   // Title
   lv_obj_t *title = lv_label_create(lv_scr_act());
@@ -299,7 +300,9 @@ void showHoldScreen() {
 
 // ─── Blackjack Screen ───────────────────────────────────────
 void showBlackjackScreen() {
-  lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x1a1a2e), 0);
+
+    lv_obj_clean(lv_scr_act());
+    lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x1a1a2e), 0);
 
   // Title
   lv_obj_t *title = lv_label_create(lv_scr_act());
