@@ -342,7 +342,7 @@ void showBlackjackScreen() {
   // Back button
   lv_obj_t *backBtn = lv_btn_create(lv_scr_act());
   lv_obj_set_size(backBtn, 160, 55);
-  lv_obj_set_pos(backBtn, 160, 220);
+  lv_obj_set_pos(backBtn, 160, 230);
   lv_obj_add_event_cb(backBtn, [](lv_event_t *e) { showTitleScreen(); }, LV_EVENT_CLICKED, NULL);
   lv_obj_t *backLbl = lv_label_create(backBtn);
   lv_label_set_text(backLbl, "Main Menu");
@@ -405,7 +405,7 @@ void showCardSwapScreen() {
   // Back button (returns to Poker screen, not main menu, to give user a chance to change their mind on their hand)
   lv_obj_t *backBtn = lv_btn_create(lv_scr_act());
   lv_obj_set_size(backBtn, 160, 55);
-  lv_obj_set_pos(backBtn, 160, 200);
+  lv_obj_set_pos(backBtn, 160, 220);
   lv_obj_add_event_cb(backBtn, [](lv_event_t *e) { 
     showPokerScreen(); 
   }, LV_EVENT_CLICKED, NULL);
