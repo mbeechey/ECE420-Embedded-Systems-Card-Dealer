@@ -40,6 +40,12 @@ void showTitleScreen();
 void showPlayerCountScreen();
 void showGameScreen();
 void sendCommandToPi();
+void showPokerScreen();
+void showHoldScreen();
+void showBlackjackScreen();
+void newHandScreen();
+void sendNext();
+void sendDeal();
 
 // ─── LVGL callbacks ───────────────────────────────────────
 
@@ -100,14 +106,6 @@ static void btn_player_cb(lv_event_t *e) {
   showGameScreen();
 }
 
-// ─── Send command to Pi ────────────────────────────────────
-
-void sendCommandToPi() {
-  String cmd = "GAME:" + gameMode + ",PLAYERS:" + String(playerCount) + "\n";
-  Serial2.print(cmd);
-  Serial.print("Sent to Pi: ");
-  Serial.print(cmd);
-}
 
 // ─── Screens ──────────────────────────────────────────────
 
@@ -190,7 +188,7 @@ void showGameScreen() {
 
   // Route to the correct game-specific screen based on gameMode
   if (gameMode == "5card") {
-    showPokerScreen();      // 5 Card Poker
+    showPokerScreen(0);      // 5 Card Poker
   }
   else if (gameMode == "holdem") {
     showHoldScreen();       // Texas Hold'em
@@ -208,9 +206,10 @@ void showGameScreen() {
 }
 
 // ─── 5 Card Poker Screen ─────────────────────────────────────
-void showPokerScreen() {
+void showPokerScreen(int currentPlayer) {
   lv_obj_clean(lv_scr_act());
   lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x1a1a2e), 0);
+  int gameState = currentPlayer;
 
   // Title
   lv_obj_t *title = lv_label_create(lv_scr_act());
@@ -226,10 +225,10 @@ void showPokerScreen() {
 
   // "New Cards" button goes to screen where current user can swap cards in hand
   lv_obj_t *btnNewCards = lv_btn_create(lv_scr_act());
-  lv_obj_set_size(btnNewCards, 220, 80);
-  lv_obj_set_pos(btnNewCards, 130, 120);
+  lv_obj_set_size(btnNewCards, 220, 60);
+  lv_obj_set_pos(btnNewCards, 130, 100);
   lv_obj_add_event_cb(btnNewCards, [](lv_event_t *e) {
-    showCardSwapScreen();        // Go to card swap selection
+    showCardSwapScreen(gameState);        // Go to card swap selection
   }, LV_EVENT_CLICKED, NULL);
   lv_obj_t *lbl1 = lv_label_create(btnNewCards);
   lv_label_set_text(lbl1, "New Cards");
@@ -237,11 +236,15 @@ void showPokerScreen() {
 
   // "Next Player" button
   lv_obj_t *btnNextPlayer = lv_btn_create(lv_scr_act());
-  lv_obj_set_size(btnNextPlayer, 220, 80);
-  lv_obj_set_pos(btnNextPlayer, 130, 220);
+  lv_obj_set_size(btnNextPlayer, 220, 60);
+  lv_obj_set_pos(btnNextPlayer, 130, 170);
   lv_obj_add_event_cb(btnNextPlayer, [](lv_event_t *e) {
     Serial.println("5 Card: Next Player");
-    // TODO: Send command to Pi if needed
+    sendNext();
+    gameState++;
+    if(gameState >= playerCount){
+      newHandScreen();
+    }
   }, LV_EVENT_CLICKED, NULL);
   lv_obj_t *lbl2 = lv_label_create(btnNextPlayer);
   lv_label_set_text(lbl2, "Next Player");
@@ -250,7 +253,7 @@ void showPokerScreen() {
   // Back button to Main Menu
   lv_obj_t *backBtn = lv_btn_create(lv_scr_act());
   lv_obj_set_size(backBtn, 160, 55);
-  lv_obj_set_pos(backBtn, 160, 320);
+  lv_obj_set_pos(backBtn, 160, 240);
   lv_obj_add_event_cb(backBtn, [](lv_event_t *e) { showTitleScreen(); }, LV_EVENT_CLICKED, NULL);
   lv_obj_t *backLbl = lv_label_create(backBtn);
   lv_label_set_text(backLbl, "Main Menu");
@@ -262,6 +265,7 @@ void showPokerScreen() {
 void showHoldScreen() {
     lv_obj_clean(lv_scr_act());
     lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x1a1a2e), 0);
+    int gameState = 0;
 
   // Title
   lv_obj_t *title = lv_label_create(lv_scr_act());
@@ -277,11 +281,16 @@ void showHoldScreen() {
 
   // Single large button
   lv_obj_t *btnDeal = lv_btn_create(lv_scr_act());
-  lv_obj_set_size(btnDeal, 280, 90);
-  lv_obj_set_pos(btnDeal, 100, 140);
+  lv_obj_set_size(btnDeal, 160, 90);
+  lv_obj_set_pos(btnDeal, 160, 100);
   lv_obj_add_event_cb(btnDeal, [](lv_event_t *e) {
     Serial.println("Hold'em: Deal next game phase");
-    // TODO: Send command to Pi which deals cards based on current phase of hand
+    sendNext();
+    gameState++;
+    if(gameState >= 3){
+      newHandScreen();
+    }
+
   }, LV_EVENT_CLICKED, NULL);
   lv_obj_t *lbl = lv_label_create(btnDeal);
   lv_label_set_text(lbl, "Deal Next Game Phase");
@@ -290,7 +299,7 @@ void showHoldScreen() {
   // Back button
   lv_obj_t *backBtn = lv_btn_create(lv_scr_act());
   lv_obj_set_size(backBtn, 160, 55);
-  lv_obj_set_pos(backBtn, 160, 320);
+  lv_obj_set_pos(backBtn, 160, 230);
   lv_obj_add_event_cb(backBtn, [](lv_event_t *e) { showTitleScreen(); }, LV_EVENT_CLICKED, NULL);
   lv_obj_t *backLbl = lv_label_create(backBtn);
   lv_label_set_text(backLbl, "Main Menu");
@@ -300,6 +309,8 @@ void showHoldScreen() {
 
 // ─── Blackjack Screen ───────────────────────────────────────
 void showBlackjackScreen() {
+
+  int gameState = 0;
 
     lv_obj_clean(lv_scr_act());
     lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x1a1a2e), 0);
@@ -319,10 +330,10 @@ void showBlackjackScreen() {
   // Hit and Stand buttons side by side
   lv_obj_t *btnHit = lv_btn_create(lv_scr_act());
   lv_obj_set_size(btnHit, 140, 90);
-  lv_obj_set_pos(btnHit, 80, 140);
+  lv_obj_set_pos(btnHit, 80, 120);
   lv_obj_add_event_cb(btnHit, [](lv_event_t *e) {
     Serial.println("Blackjack: HIT");
-    // TODO: Send command to Pi
+    sendDeal();
   }, LV_EVENT_CLICKED, NULL);
   lv_obj_t *lblHit = lv_label_create(btnHit);
   lv_label_set_text(lblHit, "HIT");
@@ -330,10 +341,15 @@ void showBlackjackScreen() {
 
   lv_obj_t *btnStand = lv_btn_create(lv_scr_act());
   lv_obj_set_size(btnStand, 140, 90);
-  lv_obj_set_pos(btnStand, 260, 140);
+  lv_obj_set_pos(btnStand, 260, 120);
   lv_obj_add_event_cb(btnStand, [](lv_event_t *e) {
     Serial.println("Blackjack: STAND");
-    // TODO: Send command to Pi
+    sendNext();
+    gameState++;
+    //must be Playercount +1 for Dealer
+    if(gameState >= playerCount+1){
+      newHandScreen()
+    }
   }, LV_EVENT_CLICKED, NULL);
   lv_obj_t *lblStand = lv_label_create(btnStand);
   lv_label_set_text(lblStand, "STAND");
@@ -342,7 +358,7 @@ void showBlackjackScreen() {
   // Back button
   lv_obj_t *backBtn = lv_btn_create(lv_scr_act());
   lv_obj_set_size(backBtn, 160, 55);
-  lv_obj_set_pos(backBtn, 160, 320);
+  lv_obj_set_pos(backBtn, 160, 230);
   lv_obj_add_event_cb(backBtn, [](lv_event_t *e) { showTitleScreen(); }, LV_EVENT_CLICKED, NULL);
   lv_obj_t *backLbl = lv_label_create(backBtn);
   lv_label_set_text(backLbl, "Main Menu");
@@ -350,9 +366,11 @@ void showBlackjackScreen() {
 }
 
 // ─── Card Swap Screen (for 5 Card Poker) ─────────────────────
-void showCardSwapScreen() {
+void showCardSwapScreen(int currentPlayer) {
   lv_obj_clean(lv_scr_act());
   lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x1a1a2e), 0);
+
+  int gameState = currentPlayer;
 
   // Title
   lv_obj_t *title = lv_label_create(lv_scr_act());
@@ -370,9 +388,9 @@ void showCardSwapScreen() {
   int nums[] = {1, 2, 3, 4};
   int btnW = 100;
   int btnH = 100;
-  int startX = 70;
+  int startX = 5;
   int startY = 110;
-  int gapX = 25;
+  int gapX = 20;
 
   for (int i = 0; i < 4; i++) {
     int x = startX + i * (btnW + gapX);
@@ -386,32 +404,103 @@ void showCardSwapScreen() {
       int numCards = (int)(intptr_t)lv_event_get_user_data(e);
       
       // Send command to Pi
-      String cmd = "SWAP:" + String(numCards) + "\n";
-      Serial2.print(cmd);
-      
-      Serial.print("Sent to Pi: SWAP:");
-      Serial.println(numCards);
+      ////Send Number of deal commands based on buton selection
+      for (int j = 0; j < numCards; j++){
+        sendDeal();
+      }
+      //Iterate to next Player
+      sendNext();
+      gameState++;
 
       // Return to the 5 Card Poker screen
-      showPokerScreen();
+      showPokerScreen(gameState);
     }, LV_EVENT_CLICKED, (void*)(intptr_t)nums[i]);
 
     lv_obj_t *lbl = lv_label_create(btn);
     lv_label_set_text_fmt(lbl, "%d", nums[i]);
     lv_obj_center(lbl);
-    lv_obj_set_style_text_font(lbl, &lv_font_montserrat_28, 0); // Larger number
+    lv_obj_set_style_text_font(lbl, &lv_font_montserrat_16, 0); // Larger number
   }
 
   // Back button (returns to Poker screen, not main menu, to give user a chance to change their mind on their hand)
   lv_obj_t *backBtn = lv_btn_create(lv_scr_act());
   lv_obj_set_size(backBtn, 160, 55);
-  lv_obj_set_pos(backBtn, 160, 320);
+  lv_obj_set_pos(backBtn, 160, 220);
   lv_obj_add_event_cb(backBtn, [](lv_event_t *e) { 
-    showPokerScreen(); 
+    showPokerScreen(gameState); 
   }, LV_EVENT_CLICKED, NULL);
   lv_obj_t *backLbl = lv_label_create(backBtn);
   lv_label_set_text(backLbl, "Cancel");
   lv_obj_center(backLbl);
+}
+
+// ─── New Hand Screen ──────────────────────────────────────
+void newHandScreen() {
+    lv_obj_clean(lv_scr_act());
+    lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x1a1a2e), 0);
+
+    // Title
+    lv_obj_t *title = lv_label_create(lv_scr_act());
+    lv_label_set_text(title, "Hand Complete");
+    lv_obj_set_style_text_color(title, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 25);
+
+    // Subtitle
+    lv_obj_t *subtitle = lv_label_create(lv_scr_act());
+    lv_label_set_text(subtitle, "What would you like to do next?");
+    lv_obj_set_style_text_color(subtitle, lv_color_hex(0xAAAAAA), 0);
+    lv_obj_align(subtitle, LV_ALIGN_TOP_MID, 0, 65);
+
+    // New Hand button - centered and larger
+    lv_obj_t *btnNewHand = lv_btn_create(lv_scr_act());
+    lv_obj_set_size(btnNewHand, 300, 85);
+    lv_obj_align(btnNewHand, LV_ALIGN_CENTER, 0, -40);        // Centered, slightly above middle
+    lv_obj_add_event_cb(btnNewHand, [](lv_event_t *e) {
+        Serial.println("Starting new hand of the same game");
+        showGameScreen();
+    }, LV_EVENT_CLICKED, NULL);
+
+    lv_obj_t *lblNew = lv_label_create(btnNewHand);
+    lv_label_set_text(lblNew, "New Hand");
+    lv_obj_center(lblNew);
+    lv_obj_set_style_text_font(lblNew, &lv_font_montserrat_22, 0);
+
+    // Main Menu button - centered below
+    lv_obj_t *btnMainMenu = lv_btn_create(lv_scr_act());
+    lv_obj_set_size(btnMainMenu, 300, 85);
+    lv_obj_align(btnMainMenu, LV_ALIGN_CENTER, 0, 65);        // Centered, below first button
+    lv_obj_add_event_cb(btnMainMenu, [](lv_event_t *e) {
+        Serial.println("Returning to main menu");
+        showTitleScreen();
+    }, LV_EVENT_CLICKED, NULL);
+
+    lv_obj_t *lblMenu = lv_label_create(btnMainMenu);
+    lv_label_set_text(lblMenu, "Main Menu");
+    lv_obj_center(lblMenu);
+    lv_obj_set_style_text_font(lblMenu, &lv_font_montserrat_22, 0);
+}
+
+
+
+//UART Functions
+
+void sendCommandToPi() {
+  String cmd = "GAME:" + gameMode + ",PLAYERS:" + String(playerCount) + "\n";
+  Serial2.print(cmd);
+  Serial.print("Sent to Pi: ");
+  Serial.print(cmd);
+}
+
+void sendNext(){
+    Serial2.print("Next"+"\n");
+    Serial.print("Sent to Pi: ");
+    Serial.print("Next"+"\n");
+}
+
+void sendDeal(){
+    Serial2.print("Deal"+"\n");
+    Serial.print("Sent to Pi: ");
+    Serial.print("Deal"+"\n");
 }
 
 // ─── Setup ────────────────────────────────────────────────
