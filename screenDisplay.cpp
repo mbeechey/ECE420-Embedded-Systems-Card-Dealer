@@ -457,6 +457,7 @@ void newHandScreen() {
     lv_obj_align(btnNewHand, LV_ALIGN_CENTER, 0, -40);        // Centered, slightly above middle
     lv_obj_add_event_cb(btnNewHand, [](lv_event_t *e) {
         Serial.println("Starting new hand of the same game");
+        sendCommandToPi();
         showGameScreen();
     }, LV_EVENT_CLICKED, NULL);
 

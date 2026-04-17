@@ -183,7 +183,7 @@ def handle_command(cmd):
             dealOneCard()
 
         elif cmd.upper() == "NEXT":
-            nextPhase():
+            nextPhase()
 
         
     except Exception as e:
