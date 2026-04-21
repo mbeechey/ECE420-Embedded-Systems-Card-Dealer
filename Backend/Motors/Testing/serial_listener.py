@@ -1,10 +1,12 @@
 import serial
 import time
+from stepper import setup, player_scan, cleanup
 
 # Open serial port
 ser = serial.Serial('/dev/ttyS0', 115200, timeout=1)
-time.sleep(2)  # wait for serial to settle
+time.sleep(2)
 
+setup()
 print("Serial listener started, waiting for commands...")
 
 def handle_command(cmd):
@@ -22,23 +24,28 @@ def handle_command(cmd):
         
         if game == "holdem":
             print("Starting Texas Hold Em")
-            # start_holdem(players)
+            player_scan(players)
             
         elif game == "5card":
             print("Starting 5 Card Poker")
-            # start_5card(players)
+            player_scan(players)
             
         elif game == "blkjk":
             print("Starting Blackjack")
-            # start_blackjack(players)
+            player_scan(players)
             
     except Exception as e:
         print(f"Error parsing command: {e}")
 
 # Main loop
-while True:
-    if ser.in_waiting > 0:
-        line = ser.readline().decode('utf-8').strip()
-        if line:
-            handle_command(line)
-    time.sleep(0.1)
+try:
+    while True:
+        if ser.in_waiting > 0:
+            line = ser.readline().decode('utf-8').strip()
+            if line:
+                handle_command(line)
+        time.sleep(0.1)
+
+except KeyboardInterrupt:
+    print("\nInterrupted")
+    cleanup()

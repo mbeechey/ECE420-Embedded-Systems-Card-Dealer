@@ -5,7 +5,7 @@ IN1 = 12   # BCM 12
 IN2 = 23   # BCM 23
 PWM_FREQ = 1000
 
-GPIO.setmode(GPIO.BCM)
+GPIO.setmode(GPIO.BCM) 
 GPIO.setwarnings(False)
 
 GPIO.setup(IN1, GPIO.OUT)
@@ -33,20 +33,20 @@ def motor_stop():
 
 def dispense_one_card():
     print("Forward: dispensing")
-    motor_forward(100)        # tune 70-100
-    time.sleep(0.045)         # tune 0.05-0.18
+    motor_forward(95)# tune 70-100
+    time.sleep(0.055)      # tune 0.05-0.18
 
     print("Stop")
     motor_stop()
-    time.sleep(0.01)
+    time.sleep(0.01) # gap before reverse
 
     print("Reverse: anti-double-feed")
-    motor_reverse(70)        # tune 50-80
-    time.sleep(0.1)         # tune 0.01-0.08
+    motor_reverse(75)    # tune 50-80
+    time.sleep(0.08)      # tune 0.01-0.08
 
     print("Stop")
     motor_stop()
-    time.sleep(0.60)         # gap before next card
+    time.sleep(1.00)  # gap before next card
 
 try:
     while True:

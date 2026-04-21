@@ -1,21 +1,11 @@
 import RPi.GPIO as GPIO
 import time
 
-IN1 = 24
-IN2 = 6
-IN3 = 5
-IN4 = 16
+DIR_PIN = 23
+STEP_PIN = 24
 
-PINS = [IN1, IN2, IN3, IN4]
+PINS = [DIR_PIN, STEP_PIN]
 
-STEP_SEQUENCE = [
-    [1, 0, 1, 0],
-    [0, 1, 1, 0],
-    [0, 1, 0, 1],
-    [1, 0, 0, 1],
-]
-
-current_step = 0
 step_position = 0
 
 STEPS_PER_REV = 1280
@@ -27,14 +17,23 @@ def setup():
         GPIO.output(pin, 0)
 
 def step(direction=1, delay=0.002):
-    global current_step, step_position
-    current_step = (current_step + direction) % 4
-    for i, pin in enumerate(PINS):
-        GPIO.output(pin, STEP_SEQUENCE[current_step][i])
+    global step_position
+    
+    # Set direction
+    if direction == 1:
+        GPIO.output(DIR_PIN, GPIO.HIGH)
+    else:
+        GPIO.output(DIR_PIN, GPIO.LOW)
+        
+    # Trigger one step
+    GPIO.output(STEP_PIN, GPIO.HIGH)
+    time.sleep(max(delay / 2.0, 0.000002)) # At least 1.9us pulse for DRV8825
+    GPIO.output(STEP_PIN, GPIO.LOW)
+    time.sleep(max(delay / 2.0, 0.000002))
+    
     step_position += direction
-    time.sleep(delay)
 
-def move_steps(num_steps, direction=1, delay=0.002):
+def move_steps(num_steps, direction=1, delay=0.001):
     for _ in range(num_steps):
         step(direction, delay)
 
